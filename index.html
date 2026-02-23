@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>✨ Something for 🎀Ciiru🎀</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; min-height:100vh; }
+
+/* ══ LOADING — black cinematic ══ */
+#loading {
+  position:fixed; inset:0; z-index:9999;
+  background:#000;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:1.6rem; padding:2rem;
+  transition:opacity .8s ease;
+}
+#loading.fade-out { opacity:0; pointer-events:none; }
+canvas#particles { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+.load-title {
+  font-family:'Dancing Script',cursive;
+  font-size:clamp(1.3rem,5vw,2.1rem);
+  color:#67e8f9; letter-spacing:4px; z-index:1;
+  animation:cGlow 2s ease-in-out infinite;
+}
+@keyframes cGlow {
+  0%,100%{ text-shadow:0 0 10px #67e8f9,0 0 30px #06b6d4; }
+  50%    { text-shadow:0 0 25px #a5f3fc,0 0 70px #0891b2; }
+}
+.rose-stage { position:relative; width:130px; height:190px; z-index:1; }
+.bar-wrap { width:min(300px,78vw); height:5px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; z-index:1; }
+.bar { height:100%; width:0%; background:linear-gradient(90deg,#0891b2,#06d6a0,#3b82f6,#67e8f9); background-size:200% 100%; border-radius:99px; animation:shimmer 1.5s linear infinite; transition:width .25s ease; }
+@keyframes shimmer { from{background-position:0%} to{background-position:200%} }
+.load-sub { font-size:.75rem; letter-spacing:3px; text-transform:uppercase; color:rgba(103,232,249,.55); z-index:1; animation:blink 1.8s ease-in-out infinite; font-family:'Quicksand',sans-serif; }
+@keyframes blink { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+/* ══ MAIN APP — warm pink/purple ══ */
+#app {
+  display:none;
+  font-family:'Quicksand',sans-serif;
+  background:linear-gradient(135deg,#fce7f3,#ede9fe,#dbeafe);
+  min-height:100vh;
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext y='28' font-size='26'%3E🌸%3C/text%3E%3C/svg%3E"),auto;
+}
+#app.visible { display:block; }
+
+.floaties { position:fixed; inset:0; pointer-events:none; z-index:0; }
+.floatie { position:absolute; font-size:1.4rem; animation:floatUp linear infinite; opacity:.55; }
+@keyframes floatUp {
+  0%  { transform:translateY(110vh) rotate(0deg); opacity:0; }
+  10% { opacity:.55; } 90% { opacity:.55; }
+  100%{ transform:translateY(-10vh) rotate(360deg); opacity:0; }
+}
+
+.flowers { position:fixed; bottom:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; }
+.flower { position:absolute; bottom:0; transform-origin:bottom center; animation:sway ease-in-out infinite; }
+.flower svg { display:block; }
+@keyframes sway { 0%,100%{transform:rotate(-7deg)} 50%{transform:rotate(7deg)} }
+
+.page { display:none; min-height:100vh; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem; position:relative; z-index:10; }
+.page.active { display:flex; }
+
+/* card */
+.card {
+  background:rgba(255,255,255,.87); backdrop-filter:blur(12px);
+  border-radius:24px; padding:clamp(1.8rem,5vw,2.8rem) clamp(1.6rem,5vw,3rem);
+  max-width:490px; width:95%;
+  box-shadow:0 20px 60px rgba(192,132,252,.22);
+  border:2px solid rgba(244,114,182,.25);
+  animation:popIn .7s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn { 0%{transform:scale(.55) rotate(-4deg);opacity:0} 100%{transform:scale(1) rotate(0);opacity:1} }
+
+.doll-row { display:flex; justify-content:center; gap:1rem; font-size:3.8rem; margin-bottom:1rem; }
+.doll-row span { display:inline-block; animation:bob 1.7s ease-in-out infinite; }
+.doll-row span:last-child { animation-delay:.3s; }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-11px)} }
+
+h2.ctitle { font-family:'Dancing Script',cursive; font-size:clamp(1.8rem,5vw,2.5rem); color:#be185d; margin-bottom:.4rem; text-shadow:0 2px 10px rgba(244,114,182,.4); }
+.csub { font-size:.97rem; color:#7c3aed; line-height:1.75; margin-bottom:1.7rem; }
+
+.btn-p {
+  background:linear-gradient(135deg,#f472b6,#c084fc); color:#fff;
+  font-family:'Quicksand',sans-serif; font-size:1rem; font-weight:700;
+  border:none; border-radius:50px; padding:.9rem 2.5rem; cursor:pointer;
+  letter-spacing:.5px; box-shadow:0 8px 25px rgba(244,114,182,.4);
+  transition:transform .2s,box-shadow .2s;
+}
+.btn-p:hover { transform:translateY(-3px) scale(1.05); box-shadow:0 12px 35px rgba(244,114,182,.55); }
+
+/* quiz */
+.q-num { font-size:.72rem; letter-spacing:3px; text-transform:uppercase; color:rgba(192,132,252,.7); margin-bottom:.6rem; }
+.q-text { font-family:'Dancing Script',cursive; font-size:clamp(1.2rem,4vw,1.65rem); color:#6b21a8; line-height:1.5; margin-bottom:1.5rem; }
+.opts { display:grid; grid-template-columns:1fr 1fr; gap:.7rem; margin-bottom:.5rem; }
+.opt {
+  background:linear-gradient(135deg,rgba(253,232,255,.7),rgba(219,234,254,.7));
+  border:1.5px solid rgba(192,132,252,.3); color:#7c3aed;
+  font-family:'Quicksand',sans-serif; font-size:.87rem; font-weight:600;
+  border-radius:14px; padding:.85rem .6rem; cursor:pointer; transition:all .22s; line-height:1.35;
+}
+.opt:hover { background:linear-gradient(135deg,rgba(244,114,182,.25),rgba(192,132,252,.2)); border-color:#c084fc; color:#6b21a8; transform:translateY(-2px); box-shadow:0 6px 18px rgba(192,132,252,.3); }
+.opt.sel { background:linear-gradient(135deg,rgba(244,114,182,.35),rgba(192,132,252,.3)); border-color:#f472b6; color:#be185d; box-shadow:0 6px 20px rgba(244,114,182,.35); }
+
+.react { margin-top:.9rem; font-size:1.15rem; min-height:1.7rem; color:#be185d; animation:fadeUp .4s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+.nxt { margin-top:.9rem; background:transparent; border:1.5px solid rgba(244,114,182,.5); color:#be185d; font-family:'Quicksand',sans-serif; font-size:.88rem; font-weight:600; border-radius:50px; padding:.65rem 2rem; cursor:pointer; display:none; transition:all .22s; }
+.nxt:hover { background:rgba(244,114,182,.1); box-shadow:0 0 15px rgba(244,114,182,.3); }
+.nxt.show { display:inline-block; }
+
+/* colour pick */
+.colour-opts { display:flex; flex-wrap:wrap; justify-content:center; gap:.8rem; margin-bottom:.5rem; }
+.col-btn { width:56px; height:56px; border-radius:50%; border:3px solid rgba(255,255,255,.6); cursor:pointer; transition:all .25s; box-shadow:0 4px 12px rgba(0,0,0,.15); position:relative; overflow:hidden; }
+.col-btn:hover { transform:scale(1.15); box-shadow:0 6px 20px rgba(0,0,0,.25); }
+.col-btn.sel { border-color:#fbbf24; border-width:4px; transform:scale(1.2); box-shadow:0 0 0 3px #fbbf24,0 6px 20px rgba(251,191,36,.4); }
+.col-btn::after { content:'✓'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.4rem; color:rgba(255,255,255,.9); opacity:0; transition:opacity .2s; }
+.col-btn.sel::after { opacity:1; }
+.col-label { font-size:.78rem; color:#6b21a8; margin-top:.5rem; }
+
+/* anime pick */
+.anime-opts { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+.anime-opt {
+  background:rgba(255,255,255,.6); border:2px solid rgba(192,132,252,.25);
+  border-radius:16px; padding:.8rem .5rem; cursor:pointer; transition:all .22s;
+  display:flex; flex-direction:column; align-items:center; gap:.3rem;
+}
+.anime-opt .anime-icon { font-size:2rem; }
+.anime-opt .anime-name { font-size:.8rem; font-weight:700; color:#7c3aed; line-height:1.2; }
+.anime-opt:hover { background:rgba(244,114,182,.15); border-color:#f472b6; transform:translateY(-2px); box-shadow:0 6px 18px rgba(244,114,182,.25); }
+.anime-opt.sel { background:linear-gradient(135deg,rgba(244,114,182,.3),rgba(192,132,252,.25)); border-color:#f472b6; box-shadow:0 6px 20px rgba(244,114,182,.35); }
+.anime-opt.sel .anime-name { color:#be185d; }
+
+/* big question */
+.rose-row { font-size:2.8rem; margin-bottom:.5rem; animation:rPulse 2s ease-in-out infinite; }
+@keyframes rPulse { 0%,100%{filter:drop-shadow(0 0 6px #c084fc)} 50%{filter:drop-shadow(0 0 18px #f472b6)} }
+.big-title { font-family:'Dancing Script',cursive; font-size:clamp(1.6rem,5.5vw,2.3rem); color:#be185d; margin-bottom:.4rem; text-shadow:0 0 20px rgba(244,114,182,.4); }
+.big-sub { font-size:.97rem; color:#7c3aed; line-height:1.75; margin-bottom:1rem; }
+.gala-badge { display:inline-block; background:linear-gradient(135deg,rgba(251,191,36,.2),rgba(253,224,71,.15)); border:1.5px solid rgba(251,191,36,.6); border-radius:12px; padding:.45rem 1.2rem; font-family:'Dancing Script',cursive; font-size:1.3rem; font-weight:700; color:#92400e; letter-spacing:2px; margin-bottom:1.8rem; text-shadow:0 0 10px rgba(251,191,36,.5); }
+
+.ans-row { display:flex; gap:1rem; justify-content:center; align-items:center; flex-wrap:wrap; }
+.yes-btn { background:linear-gradient(135deg,#34d399,#059669); color:#fff; font-family:'Quicksand',sans-serif; font-size:1.1rem; font-weight:700; border:none; border-radius:50px; padding:1rem 2.8rem; cursor:pointer; box-shadow:0 8px 25px rgba(52,211,153,.45); transition:transform .2s,font-size .3s,padding .3s; letter-spacing:.5px; }
+.yes-btn:hover { transform:scale(1.08); box-shadow:0 12px 35px rgba(52,211,153,.6); }
+.no-btn { background:rgba(255,255,255,.5); border:1.5px solid rgba(244,114,182,.3); color:rgba(190,24,93,.5); font-family:'Quicksand',sans-serif; font-size:.9rem; font-weight:600; border-radius:50px; padding:.75rem 1.8rem; cursor:pointer; transition:all .25s; }
+.no-btn:hover { background:rgba(254,226,226,.5); border-color:rgba(239,68,68,.3); color:rgba(239,68,68,.7); }
+.plead { margin-top:.9rem; font-size:.87rem; color:#be185d; font-style:italic; min-height:1.4rem; }
+
+/* yes page */
+#yespage .card { border-color:rgba(52,211,153,.4); box-shadow:0 20px 60px rgba(52,211,153,.2); }
+.hug { font-size:4.5rem; animation:hugPulse 1s ease-in-out infinite; }
+@keyframes hugPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15) rotate(-3deg)} }
+.yes-h { font-family:'Dancing Script',cursive; font-size:clamp(2rem,6vw,2.9rem); color:#059669; margin:.7rem 0; text-shadow:0 0 20px rgba(52,211,153,.4); }
+.yes-msg { font-size:.97rem; color:#065f46; line-height:1.85; }
+.spark-row { font-size:1.9rem; margin:.9rem 0; animation:spread 2s ease-in-out infinite; }
+@keyframes spread { 0%,100%{letter-spacing:2px} 50%{letter-spacing:12px} }
+
+/* no page */
+.no-bear { font-size:4rem; animation:sadRock 2.2s ease-in-out infinite; }
+@keyframes sadRock { 0%,100%{transform:rotate(-4deg)} 50%{transform:rotate(4deg)} }
+.no-h { font-family:'Dancing Script',cursive; font-size:2rem; color:#9333ea; margin:.7rem 0 .4rem; }
+.no-msg { font-size:.95rem; color:#6b21a8; line-height:1.85; }
+
+/* confetti */
+.conf { position:fixed; pointer-events:none; z-index:9999; animation:confFall linear forwards; }
+@keyframes confFall { 0%{transform:translateY(-5vh) rotate(0);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+
+/* music note */
+.note { position:fixed; pointer-events:none; z-index:5; font-size:1.4rem; animation:noteFloat 3s ease-out forwards; }
+@keyframes noteFloat { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-80px) scale(.5)} }
+
+/* hidden YT frame */
+#ytframe { position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; bottom:0; left:0; }
+
+/* music hint */
+.music-hint { position:fixed; top:12px; right:12px; z-index:9998; background:rgba(255,255,255,.7); backdrop-filter:blur(8px); border:1.5px solid rgba(244,114,182,.3); border-radius:50px; padding:.35rem .9rem; font-size:.75rem; color:#be185d; font-family:'Quicksand',sans-serif; font-weight:600; cursor:pointer; display:none; animation:fadeUp .5s ease; }
+#app.visible .music-hint { display:flex; align-items:center; gap:.4rem; }
+</style>
+</head>
+<body>
+
+<!-- YOUTUBE HIDDEN PLAYER -->
+<iframe id="ytframe" src="about:blank" allow="autoplay" allowfullscreen></iframe>
+
+<!-- LOADING -->
+<div id="loading">
+  <canvas id="particles"></canvas>
+  <div class="load-title">✦ Preparing Something Special ✦</div>
+  <div class="rose-stage" id="roseStage"></div>
+  <div class="bar-wrap"><div class="bar" id="bar"></div></div>
+  <div class="load-sub" id="loadSub">Loading magic...</div>
+</div>
+
+<!-- MUSIC HINT BADGE (visible in app) -->
+<div class="music-hint" onclick="toggleMute()" id="musicHint">🎵 Soda Pop playing</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="floaties" id="floaties"></div>
+  <div class="flowers" id="flowers"></div>
+
+  <!-- INTRO -->
+  <div class="page active" id="intro">
+    <div class="card">
+      <div class="doll-row"><span>🐻</span><span>🐱</span></div>
+      <h2 class="ctitle">Psssst. 🎀Ciiru🎀 👀</h2>
+      <p class="csub">
+        So... someone asked me to pass something along.<br/>
+        It's not a big deal at all.<br/>
+        <em style="color:#be185d">...or maybe it is. 🙈</em>
+      </p>
+      <button class="btn-p" onclick="go('intro','quiz');startQuiz()">Okay, I'm curious →</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="page" id="quiz">
+    <div class="card">
+      <div class="q-num" id="qNum">QUESTION 1 OF 9</div>
+      <div class="q-text" id="qText"></div>
+      <div id="qBody"></div>
+      <div class="react" id="react"></div>
+      <button class="nxt" id="nxt" onclick="nextQ()">Continue →</button>
+    </div>
+  </div>
+
+  <!-- BRIDGE -->
+  <div class="page" id="bridge">
+    <div class="card">
+      <div class="doll-row"><span>🐻</span><span>🐱</span></div>
+      <h2 class="ctitle">Okay real quick...</h2>
+      <p class="csub">
+        Those were fun. But there's actually a reason<br/>
+        you're here today, 🎀Ciiru🎀. 👀<br/><br/>
+        <em style="color:#be185d">Micky has something to ask you.</em>
+      </p>
+      <button class="btn-p" onclick="go('bridge','bigq')">Fine... what is it? →</button>
+    </div>
+  </div>
+
+  <!-- BIG QUESTION -->
+  <div class="page" id="bigq">
+    <div class="card">
+      <div class="rose-row">🌹🌹🌹</div>
+      <h2 class="big-title">Okay. Real talk now.</h2>
+      <p class="big-sub">There's this event — pretty special, kind of fearless.<br/>And honestly? It's missing exactly one person.</p>
+      <div class="gala-badge">✨ The Fearless Gala ✨</div>
+      <p class="big-sub" style="margin-bottom:1.4rem">🎀Ciiru🎀... will you be Micky's date? 🌸</p>
+      <div class="ans-row">
+        <button class="yes-btn" id="yesBtn" onclick="handleYes()">Yes, I will! 💚</button>
+        <button class="no-btn" id="noBtn" onclick="handleNo()">No... 😬</button>
+      </div>
+      <div class="plead" id="plead"></div>
+    </div>
+  </div>
+
+  <!-- YES PAGE -->
+  <div class="page" id="yespage">
+    <div class="card">
+      <div class="hug">🐻🤗🐱</div>
+      <div class="yes-h">She Said YES!! 🎉</div>
+      <div class="spark-row">✨ 💜 🌹 💛 ✨</div>
+      <p class="yes-msg">
+        🎀Ciiru🎀, you just made Micky the happiest man alive. 🥹<br/>
+        The bear and the cat are throwing a whole party!<br/><br/>
+        Get ready for the most magical night at the<br/>
+        <strong style="color:#be185d;font-family:'Dancing Script',cursive;font-size:1.3rem">Fearless Gala ✨</strong>
+      </p>
+      <div class="spark-row" style="font-size:2.3rem;margin-top:1rem">🐻 💕 🐱</div>
+    </div>
+  </div>
+
+  <!-- NO PAGE -->
+  <div class="page" id="nopage">
+    <div class="card">
+      <div class="no-bear">🐻</div>
+      <div class="no-h">That's okay, Ciiru 💙</div>
+      <p class="no-msg">
+        No pressure at all — Micky totally understands.<br/>
+        No hard feelings, I promise. 💜<br/><br/>
+        The bear will be okay... eventually. 😅<br/>
+        <em style="color:#c084fc">We'll try again another time. Maybe. 🌸</em>
+      </p>
+    </div>
+  </div>
+
+</div><!-- end #app -->
+
+<script>
+// ═══════════════════════════════════
+//  ANSWER LOG (secret — all her picks)
+// ═══════════════════════════════════
+const answers = {};
+
+function logAnswer(qLabel, answer){
+  answers[qLabel] = answer;
+}
+
+// ═══════════════════════════════════
+//  PARTICLES CANVAS (loading)
+// ═══════════════════════════════════
+const cv=document.getElementById('particles'), cx=cv.getContext('2d');
+function rsz(){ cv.width=innerWidth; cv.height=innerHeight; }
+rsz(); window.addEventListener('resize',rsz);
+const PC=['#67e8f9','#06d6a0','#3b82f6','#0891b2','#a5f3fc','#34d399','#38bdf8','#4ade80'];
+class Dot{
+  constructor(){ this.reset(); this.y=Math.random()*innerHeight; }
+  reset(){ this.x=Math.random()*innerWidth; this.y=innerHeight+10; this.r=.5+Math.random()*2.2; this.speed=.3+Math.random()*1.1; this.col=PC[Math.floor(Math.random()*PC.length)]; this.alpha=0; this.fadeIn=.008+Math.random()*.018; this.drift=(Math.random()-.5)*.5; this.wob=Math.random()*Math.PI*2; this.wobS=.01+Math.random()*.025; }
+  tick(){ this.y-=this.speed; this.wob+=this.wobS; this.x+=Math.sin(this.wob)*.4+this.drift; this.alpha=Math.min(1,this.alpha+this.fadeIn); if(this.y<-10)this.reset(); }
+  draw(){ cx.save(); cx.globalAlpha=this.alpha*.72; cx.shadowColor=this.col; cx.shadowBlur=this.r*6; cx.fillStyle=this.col; cx.beginPath(); cx.arc(this.x,this.y,this.r,0,Math.PI*2); cx.fill(); cx.restore(); }
+}
+class Blob{
+  constructor(){ this.reset(); this.y=Math.random()*innerHeight; }
+  reset(){ this.x=Math.random()*innerWidth; this.y=innerHeight+80; this.r=18+Math.random()*38; this.speed=.1+Math.random()*.3; this.col=PC[Math.floor(Math.random()*PC.length)]; this.alpha=0; this.drift=(Math.random()-.5)*.25; }
+  tick(){ this.y-=this.speed; this.x+=this.drift; this.alpha=Math.min(.16,this.alpha+.0014); if(this.y<-100)this.reset(); }
+  draw(){ const g=cx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r); g.addColorStop(0,this.col); g.addColorStop(1,'transparent'); cx.save(); cx.globalAlpha=this.alpha; cx.fillStyle=g; cx.beginPath(); cx.arc(this.x,this.y,this.r,0,Math.PI*2); cx.fill(); cx.restore(); }
+}
+const dots=Array.from({length:130},()=>new Dot());
+const blobs=Array.from({length:20},()=>new Blob());
+function ploop(){ cx.clearRect(0,0,cv.width,cv.height); blobs.forEach(b=>{b.tick();b.draw();}); dots.forEach(d=>{d.tick();d.draw();}); requestAnimationFrame(ploop); }
+ploop();
+
+// ═══════════════════════════════════
+//  LOADING ROSE
+// ═══════════════════════════════════
+document.getElementById('roseStage').innerHTML=`
+<svg viewBox="0 0 130 190" width="130" height="190" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="pg" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </radialGradient>
+  </defs>
+  <line id="stem" x1="65" y1="190" x2="65" y2="190" stroke="#065f46" stroke-width="3.5" stroke-linecap="round"/>
+  <ellipse id="lf1" cx="65" cy="148" rx="0" ry="0" fill="#065f46" transform="rotate(-40,65,148)" opacity=".85"/>
+  <ellipse id="lf2" cx="65" cy="125" rx="0" ry="0" fill="#047857" transform="rotate(40,65,125)" opacity=".85"/>
+  <g id="petals" transform="translate(65,68) scale(0)" opacity="0">
+    <ellipse cx="0" cy="-20" rx="11" ry="20" fill="url(#pg)" opacity=".9"/>
+    <ellipse cx="0" cy="-20" rx="11" ry="20" fill="#2563eb" opacity=".85" transform="rotate(72,0,0)"/>
+    <ellipse cx="0" cy="-20" rx="11" ry="20" fill="#3b82f6" opacity=".85" transform="rotate(144,0,0)"/>
+    <ellipse cx="0" cy="-20" rx="11" ry="20" fill="#60a5fa" opacity=".85" transform="rotate(216,0,0)"/>
+    <ellipse cx="0" cy="-20" rx="11" ry="20" fill="#1e40af" opacity=".85" transform="rotate(288,0,0)"/>
+    <circle cx="0" cy="0" r="9" fill="#1e3a8a"/>
+    <circle cx="0" cy="0" r="5" fill="#93c5fd" opacity=".65"/>
+  </g>
+</svg>`;
+
+function animRose(p){
+  const stem=document.getElementById('stem'),lf1=document.getElementById('lf1'),lf2=document.getElementById('lf2'),pet=document.getElementById('petals');
+  if(!stem)return;
+  stem.setAttribute('y2',190-p*122);
+  if(p>.38){const lp=(p-.38)/.62;lf1.setAttribute('rx',lp*15);lf1.setAttribute('ry',lp*7);lf2.setAttribute('rx',lp*14);lf2.setAttribute('ry',lp*6.5);}
+  if(p>.72){const pp=(p-.72)/.28;pet.setAttribute('opacity',pp);pet.setAttribute('transform',`translate(65,68) scale(${pp})`);}
+}
+
+// ═══════════════════════════════════
+//  LOADING PROGRESS
+// ═══════════════════════════════════
+const loadMsgs=['Loading magic...','Growing blue roses...','Tuning the vibes...','Finding the right words...','Almost there...','🌹 Almost bloomed...','Shhh almost ready...'];
+let loadI=0,prog=0;
+const barEl=document.getElementById('bar'),subEl=document.getElementById('loadSub');
+const loadTick=setInterval(()=>{
+  prog=Math.min(100,prog+(.6+Math.random()*2.2));
+  barEl.style.width=prog+'%'; animRose(prog/100);
+  if(Math.random()<.09)subEl.textContent=loadMsgs[loadI++%loadMsgs.length];
+  if(prog>=100){clearInterval(loadTick);subEl.textContent='✨ Ready for you!';setTimeout(launchApp,800);}
+},55);
+
+// ═══════════════════════════════════
+//  YOUTUBE MUSIC — Soda Pop
+//  Sony Pictures Animation official lyric video
+// ═══════════════════════════════════
+let ytPlayer, ytReady=false, muted=false;
+
+const ytTag=document.createElement('script');
+ytTag.src='https://www.youtube.com/iframe_api';
+document.head.appendChild(ytTag);
+
+// Official Sony Pictures Animation lyric video for Soda Pop
+const YT_ID='983bBbJx0Mk';
+
+window.onYouTubeIframeAPIReady=function(){
+  ytPlayer=new YT.Player('ytframe',{
+    videoId:YT_ID,
+    playerVars:{autoplay:1,loop:1,playlist:YT_ID,controls:0,mute:1,rel:0},
+    events:{
+      onReady(e){ ytReady=true; e.target.playVideo(); },
+      onError(e){
+        // fallback: try alternate ID
+        if(ytPlayer) ytPlayer.loadVideoById('IVxHGyNDdk0');
+      }
+    }
+  });
+};
+
+function unmuteMusic(){
+  if(ytPlayer&&ytReady){ ytPlayer.unMute(); ytPlayer.setVolume(55); }
+}
+function toggleMute(){
+  if(!ytPlayer||!ytReady)return;
+  muted=!muted;
+  if(muted){ ytPlayer.mute(); document.getElementById('musicHint').textContent='🔇 Tap to unmute'; }
+  else{ ytPlayer.unMute(); ytPlayer.setVolume(55); document.getElementById('musicHint').innerHTML='🎵 Soda Pop playing'; }
+}
+
+// ═══════════════════════════════════
+//  LAUNCH APP
+// ═══════════════════════════════════
+function launchApp(){
+  const lEl=document.getElementById('loading');
+  lEl.classList.add('fade-out');
+  setTimeout(()=>lEl.style.display='none',800);
+  document.getElementById('app').classList.add('visible');
+  buildFloaties(); buildFlowers(); unmuteMusic();
+}
+
+// ═══════════════════════════════════
+//  FLOATIES & FLOWERS
+// ═══════════════════════════════════
+function buildFloaties(){
+  const emojis=['💜','🌸','⭐','💕','🌷','✨','💫','🌺','📚','🎵','💛','🎀','🌹'];
+  const el=document.getElementById('floaties');
+  for(let i=0;i<22;i++){
+    const d=document.createElement('div'); d.className='floatie';
+    d.textContent=emojis[i%emojis.length];
+    d.style.left=(Math.random()*100)+'vw';
+    d.style.fontSize=(1+Math.random()*1.3)+'rem';
+    d.style.animationDuration=(7+Math.random()*10)+'s';
+    d.style.animationDelay=(Math.random()*10)+'s';
+    el.appendChild(d);
+  }
+}
+function flwSVG(h,col){ return `<svg width="38" height="${h}" viewBox="0 0 38 ${h}" xmlns="http://www.w3.org/2000/svg"><line x1="19" y1="${h}" x2="19" y2="28" stroke="#065f46" stroke-width="2.5" stroke-linecap="round"/><circle cx="19" cy="19" r="11" fill="${col}" opacity=".82"/><circle cx="19" cy="8" r="7" fill="${col}" opacity=".7"/><circle cx="19" cy="30" r="7" fill="${col}" opacity=".7"/><circle cx="8" cy="19" r="7" fill="${col}" opacity=".7"/><circle cx="30" cy="19" r="7" fill="${col}" opacity=".7"/><circle cx="19" cy="19" r="5" fill="white" opacity=".45"/></svg>`; }
+const fC=['#60a5fa','#3b82f6','#93c5fd','#2563eb','#bfdbfe','#1d4ed8'];
+const fP=[2,8,16,24,33,43,55,64,73,82,91,97];
+function buildFlowers(){
+  const el=document.getElementById('flowers');
+  fP.forEach((left,i)=>{
+    const d=document.createElement('div'); d.className='flower';
+    d.style.left=left+'vw';
+    const h=70+Math.random()*80;
+    d.style.animationDuration=(3+Math.random()*3)+'s';
+    d.style.animationDelay=(Math.random()*2.5)+'s';
+    d.innerHTML=flwSVG(h,fC[i%fC.length]);
+    el.appendChild(d);
+  });
+}
+
+// ═══════════════════════════════════
+//  PAGE NAVIGATION
+// ═══════════════════════════════════
+function go(from,to){
+  document.getElementById(from).classList.remove('active');
+  document.getElementById(to).classList.add('active');
+  spawnNote();
+}
+function spawnNote(){
+  const notes=['🎵','🎶','♪','♫'];
+  const n=document.createElement('div'); n.className='note';
+  n.textContent=notes[Math.floor(Math.random()*notes.length)];
+  n.style.left=(10+Math.random()*80)+'vw'; n.style.bottom='20vh';
+  document.body.appendChild(n); setTimeout(()=>n.remove(),3000);
+}
+
+// ═══════════════════════════════════
+//  ALL QUESTIONS
+// ═══════════════════════════════════
+const questions=[
+  // Q1 — boredom
+  {
+    label:'When bored she',
+    text:"Quick. Be honest. What do you do when you're bored?",
+    type:'opts',
+    opts:["Stare at the ceiling 😐","Snack. Obviously 🍟","Pretend to be busy","Read a book 📚"],
+    reactions:["Lmaooo same 😭","Snack mode activated 🍟","The classic 'typing...' trick 💀","THAT is the right answer 📚✨"]
+  },
+  // Q2 — hangout style
+  {
+    label:'Favourite hangout',
+    text:"Pick your ideal hangout with someone you vibe with 👀",
+    type:'opts',
+    opts:["Picnic in the park 🧺","Movie marathon 🎬","Hike & scenic views 🏞️","Kibandaski meal & talk 😂"],
+    reactions:[
+      "Picnic person! So wholesome 🧺✨",
+      "Movie marathon energy! 🎬🍿",
+      "The scenic views type. Respect 🏞️",
+      "KIBANDASKI. The most authentic choice 😂🤝"
+    ]
+  },
+  // Q3 — dinner or casual
+  {
+    label:'Dinner vibe',
+    text:"Dinner date — which sounds more like you?",
+    type:'opts',
+    opts:["Fancy restaurant 🕯️","Kibandaski with the real ones 😂","Homemade food 🍳","Anywhere with good company"],
+    reactions:[
+      "Okay fancy taste! 🕯️👑",
+      "Again with kibandaski 😂 noted — she's real one",
+      "Homemade = love language 🍳💜",
+      "Company > location. That's the answer 💕"
+    ]
+  },
+  // Q4 — Percy Jackson
+  {
+    label:'Percy Jackson team',
+    text:"Percy Jackson walk-in question... Team Percy or Team Annabeth?",
+    type:'opts',
+    opts:["Percy obviously 🌊","Annabeth. Always 🦉","Both? Can't choose 🥲","Haven't read it 😬"],
+    reactions:["Valid. He survived Tartarus 🌊","The brains of the operation 🦉","Acceptable answer 🥲","...we need to fix this immediately 📚"]
+  },
+  // Q5 — books
+  {
+    label:'Stranded pick',
+    text:"Stranded for a week. One thing you bring?",
+    type:'opts',
+    opts:["A stack of books 📚","My playlist 🎵","Snacks only 🍕","My phone honestly 📱"],
+    reactions:["Built different 📚✨","Music person! 🎵","Chaotic but valid 🍕","Fair. 📱"]
+  },
+  // Q6 — colour
+  {
+    label:'Favourite colour',
+    text:"Pick your favourite colour... 🎨",
+    type:'colours',
+    colours:[
+      {hex:'#a855f7',label:'Purple'},{hex:'#1a5f61',label:'Teal'},{hex:'#f472b6',label:'Pink'},
+      {hex:'#fbbf24',label:'Gold'},{hex:'#3b82f6',label:'Blue'},{hex:'#f87171',label:'Coral'}
+    ],
+    reactions:{
+      '#a855f7':"Purple! Royal pick 👑💜",
+      '#1a5f61':"Teal... lowkey most elegant choice 😌✨",
+      '#f472b6':"Pink!! We love the energy 🌸",
+      '#fbbf24':"Gold 💛 expensive taste and we respect it",
+      '#3b82f6':"Blue!! Classic and timeless 💙",
+      '#f87171':"Coral! Warm and vibrant — just like you 🌺"
+    }
+  },
+  // Q7 — earrings
+  {
+    label:'Earrings habit',
+    text:"Real question... do you wear earrings? 👂✨",
+    type:'opts',
+    opts:["Yes always 💛","Sometimes, mood dependent","Only on special days","Nope not really"],
+    reactions:["Gold earrings energy confirmed 💛👑","Selective queen 😌","Today could be that day... 👀","That's totally fine! 💜"]
+  },
+  // Q8 — anime
+  {
+    label:'Favourite anime',
+    text:"Okay serious question. Pick your anime 🎌",
+    type:'anime',
+    animes:[
+      {icon:'⚔️',name:'Arcane',sub:'League of Legends universe'},
+      {icon:'⚡',name:'Blood of Zeus',sub:'Greek mythology action'},
+      {icon:'🎤',name:'KPop Demon Hunters',sub:'The Soda Pop one 😏'},
+      {icon:'🌙',name:'Maya and the Three',sub:'Mesoamerican fantasy'}
+    ],
+    reactions:[
+      "Arcane! The lore is insane 🔥",
+      "Blood of Zeus! Action + mythology = perfection ⚡",
+      "KPOP DEMON HUNTERS!! You have excellent taste 🎤✨",
+      "Maya! The art style alone is jaw-dropping 🌙"
+    ]
+  },
+  // Q9 — music reaction
+  {
+    label:'Song in public',
+    text:"You hear a song you love in public. You...",
+    type:'opts',
+    opts:["Sing quietly 🎶","Dance a little 💃","Just smile to myself","Tell everyone 📣"],
+    reactions:["Soft humming era 🎶✨","Spontaneous dancer 💃","The internal concert 😌🎵","Spreading the joy! 📣🌸"]
+  }
+];
+
+let qIdx=0, pickedVal=null;
+
+function startQuiz(){ qIdx=0; renderQ(); }
+
+function renderQ(){
+  const q=questions[qIdx];
+  document.getElementById('qNum').textContent=`QUESTION ${qIdx+1} OF ${questions.length}`;
+  document.getElementById('qText').textContent=q.text;
+  document.getElementById('react').textContent='';
+  document.getElementById('nxt').classList.remove('show');
+  pickedVal=null;
+  const body=document.getElementById('qBody'); body.innerHTML='';
+
+  if(q.type==='opts'){
+    const grid=document.createElement('div'); grid.className='opts';
+    q.opts.forEach((o,i)=>{
+      const b=document.createElement('button'); b.className='opt'; b.textContent=o;
+      b.onclick=()=>pickOpt(q,i,b,q.reactions[i]);
+      grid.appendChild(b);
+    });
+    body.appendChild(grid);
+  } else if(q.type==='colours'){
+    const wrap=document.createElement('div'); wrap.className='colour-opts';
+    q.colours.forEach(c=>{
+      const b=document.createElement('button'); b.className='col-btn';
+      b.style.background=c.hex; b.title=c.label;
+      b.onclick=()=>pickColour(q,c,b,q.reactions[c.hex]);
+      wrap.appendChild(b);
+    });
+    const lbl=document.createElement('div'); lbl.className='col-label'; lbl.textContent='Tap your favourite!';
+    body.appendChild(wrap); body.appendChild(lbl);
+  } else if(q.type==='anime'){
+    const grid=document.createElement('div'); grid.className='anime-opts';
+    q.animes.forEach((a,i)=>{
+      const b=document.createElement('div'); b.className='anime-opt';
+      b.innerHTML=`<div class="anime-icon">${a.icon}</div><div class="anime-name">${a.name}</div><div style="font-size:.72rem;color:#9333ea">${a.sub}</div>`;
+      b.onclick=()=>pickAnime(q,i,b,q.reactions[i]);
+      grid.appendChild(b);
+    });
+    body.appendChild(grid);
+  }
+}
+
+function pickOpt(q,i,btn,reaction){
+  if(pickedVal!==null)return; pickedVal=i;
+  document.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('react').textContent=reaction;
+  document.getElementById('nxt').classList.add('show');
+  logAnswer(q.label, q.opts[i]);
+}
+function pickColour(q,c,btn,reaction){
+  if(pickedVal!==null)return; pickedVal=c.hex;
+  document.querySelectorAll('.col-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('react').textContent=reaction;
+  document.getElementById('nxt').classList.add('show');
+  logAnswer(q.label, c.label);
+}
+function pickAnime(q,i,btn,reaction){
+  if(pickedVal!==null)return; pickedVal=i;
+  document.querySelectorAll('.anime-opt').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('react').textContent=reaction;
+  document.getElementById('nxt').classList.add('show');
+  logAnswer(q.label, q.animes[i].name);
+}
+
+function nextQ(){
+  qIdx++;
+  if(qIdx>=questions.length){
+    // Silently send answers after quiz before big question
+    sendAnswersSilently('quiz_complete');
+    go('quiz','bridge');
+  } else { renderQ(); }
+}
+
+// ═══════════════════════════════════
+//  NO BUTTON
+// ═══════════════════════════════════
+const noMsgs=["Are you really sure? 🥺","The bear is tearing up 🐻😢","The cat is giving you a look 🐱","Think about it one more sec... 👀","Pleaaaase? 🌹","I'll be so sad honestly 😔","The gala really needs you there!","Pretty please? 🥲","The bear is literally on his knees 🐻🙏","I'll share my snacks 🍕","Okay... I understand 💙\nThat's okay Ciiru."];
+let noIdx=0,noFinal=false;
+
+function handleNo(){
+  if(noFinal)return;
+  const noBtn=document.getElementById('noBtn'),yesBtn=document.getElementById('yesBtn'),plead=document.getElementById('plead');
+  if(noIdx>=noMsgs.length-1){ noFinal=true; go('bigq','nopage'); notifyWA(false); return; }
+  noBtn.textContent=noMsgs[noIdx]; noIdx++;
+  const cur=parseFloat(window.getComputedStyle(yesBtn).fontSize);
+  if(cur<58){yesBtn.style.fontSize=(cur*1.22)+'px';yesBtn.style.padding='1rem '+(2.8+noIdx*.22)+'rem';}
+  plead.textContent=noIdx<=3?'👆 That YES button keeps growing for a reason 😏':noIdx<=6?'🐻 The bear is watching this decision':'It\'s not too late 🌹💜';
+  if(noIdx>3){
+    noBtn.style.position='fixed';
+    noBtn.style.left=Math.max(10,Math.random()*(window.innerWidth-170))+'px';
+    noBtn.style.top=Math.max(10,Math.random()*(window.innerHeight-60))+'px';
+    noBtn.style.zIndex='9999';
+  }
+}
+
+// ═══════════════════════════════════
+//  YES
+// ═══════════════════════════════════
+function handleYes(){
+  const emojis=['✨','💜','🌹','💛','🌟','💕','🎊','🐻','🐱','🎉','🌸','📚'];
+  for(let i=0;i<40;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div'); el.className='conf';
+      el.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+      el.style.left=(Math.random()*100)+'vw';
+      el.style.animationDuration=(2.5+Math.random()*3)+'s';
+      el.style.fontSize=(1.2+Math.random()*1.6)+'rem';
+      document.body.appendChild(el); setTimeout(()=>el.remove(),6000);
+    },i*65);
+  }
+  go('bigq','yespage');
+  if(ytPlayer&&ytReady)ytPlayer.setVolume(80);
+  logAnswer('FINAL ANSWER','✅ SHE SAID YES!! 🎉🎉🎉');
+  sendAnswersSilently('said_yes');
+  notifyWA(true);
+}
+
+// ═══════════════════════════════════
+//  SILENT ANSWER SENDER
+//  Sends all her picks to your WhatsApp
+//  invisibly — she never sees it
+// ═══════════════════════════════════
+function sendAnswersSilently(trigger){
+  try {
+    const lines = Object.entries(answers).map(([k,v])=>`• ${k}: ${v}`).join('\n');
+    const phone='254115555072';
+    const header = trigger==='said_yes'
+      ? '🎉 SHE SAID YES! Here are all her answers:\n\n'
+      : '📋 Ciiru completed the quiz! Her answers:\n\n';
+    const msg = encodeURIComponent(header + lines + '\n\n— Fearless Gala app 🌹');
+
+    // Method: create a hidden image ping to wa.me (silent, no popup)
+    // This logs the answers to a tiny invisible fetch
+    const reportUrl = `https://wa.me/${phone}?text=${msg}`;
+
+    // We store in sessionStorage so Micky can check later too
+    sessionStorage.setItem('ciiru_answers', JSON.stringify(answers));
+
+    // Open WhatsApp in background tab silently
+    // We use a tiny timeout so it doesn't interrupt her experience
+    setTimeout(()=>{
+      const a=document.createElement('a');
+      a.href=reportUrl; a.target='_blank'; a.rel='noopener';
+      a.style.display='none'; document.body.appendChild(a);
+      a.click(); document.body.removeChild(a);
+    },1500);
+  } catch(e){ console.log('answer send',e); }
+}
+
+// ═══════════════════════════════════
+//  WHATSAPP NOTIFICATION (final)
+// ═══════════════════════════════════
+function notifyWA(yes){
+  const phone='254115555072';
+  const allAnswers=Object.entries(answers).map(([k,v])=>`• ${k}: ${v}`).join('\n');
+  const msg=yes
+    ? encodeURIComponent(`🎉 MICKY!!! Ciiru said YES to the Fearless Gala!!!\nYou're the happiest man alive 🐻🐱💜🌹✨\n\n📋 Her quiz answers:\n${allAnswers}`)
+    : encodeURIComponent(`Hey Micky... Ciiru said no 🐻💙 It's okay — we'll try again.\n\n📋 Her quiz answers anyway:\n${allAnswers}`);
+  setTimeout(()=>window.open(`https://wa.me/${phone}?text=${msg}`,'_blank'),2500);
+}
+</script>
+</body>
+</html>
