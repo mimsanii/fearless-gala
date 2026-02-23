@@ -371,37 +371,43 @@ const loadTick=setInterval(()=>{
 //  YOUTUBE MUSIC — Soda Pop
 //  Sony Pictures Animation official lyric video
 // ═══════════════════════════════════
-let ytPlayer, ytReady=false, muted=false;
+let ytPlayer, ytReady=false, muted=false, musicStarted=false;
 
+const YT_ID='983bBbJx0Mk';
+
+// Load YouTube API
 const ytTag=document.createElement('script');
 ytTag.src='https://www.youtube.com/iframe_api';
 document.head.appendChild(ytTag);
 
-// Official Sony Pictures Animation lyric video for Soda Pop
-const YT_ID='983bBbJx0Mk';
-
 window.onYouTubeIframeAPIReady=function(){
   ytPlayer=new YT.Player('ytframe',{
     videoId:YT_ID,
-    playerVars:{autoplay:1,loop:1,playlist:YT_ID,controls:0,mute:1,rel:0},
-    events:{
-      onReady(e){ ytReady=true; e.target.playVideo(); },
-      onError(e){
-        // fallback: try alternate ID
-        if(ytPlayer) ytPlayer.loadVideoById('IVxHGyNDdk0');
-      }
-    }
+    playerVars:{autoplay:0,loop:1,playlist:YT_ID,controls:0,mute:0,rel:0,enablejsapi:1},
+    events:{ onReady(e){ ytReady=true; } }
   });
 };
 
+// Start music on first tap — bypasses browser autoplay block
+document.addEventListener('click', function onFirstClick(){
+  if(musicStarted||!ytPlayer||!ytReady) return;
+  musicStarted=true;
+  ytPlayer.setVolume(60);
+  ytPlayer.playVideo();
+}, {once:true});
+
 function unmuteMusic(){
-  if(ytPlayer&&ytReady){ ytPlayer.unMute(); ytPlayer.setVolume(55); }
+  if(ytPlayer&&ytReady&&!musicStarted){
+    musicStarted=true;
+    ytPlayer.setVolume(60);
+    ytPlayer.playVideo();
+  }
 }
 function toggleMute(){
   if(!ytPlayer||!ytReady)return;
   muted=!muted;
-  if(muted){ ytPlayer.mute(); document.getElementById('musicHint').textContent='🔇 Tap to unmute'; }
-  else{ ytPlayer.unMute(); ytPlayer.setVolume(55); document.getElementById('musicHint').innerHTML='🎵 Soda Pop playing'; }
+  if(muted){ ytPlayer.mute(); document.getElementById('musicHint').innerHTML='🔇 Tap to unmute'; }
+  else{ ytPlayer.unMute(); ytPlayer.setVolume(60); document.getElementById('musicHint').innerHTML='🎵 Soda Pop playing'; }
 }
 
 // ═══════════════════════════════════
