@@ -180,8 +180,10 @@ h2.ctitle { font-family:'Dancing Script',cursive; font-size:clamp(1.8rem,5vw,2.5
 </head>
 <body>
 
-<!-- YOUTUBE HIDDEN PLAYER -->
-<iframe id="ytframe" src="about:blank" allow="autoplay" allowfullscreen></iframe>
+<!-- LOCAL AUDIO PLAYER -->
+<audio id="bgMusic" loop preload="auto" playsinline>
+  <source src="assets/song.mp3" type="audio/mpeg">
+</audio>
 
 <!-- LOADING -->
 <div id="loading">
@@ -193,7 +195,7 @@ h2.ctitle { font-family:'Dancing Script',cursive; font-size:clamp(1.8rem,5vw,2.5
 </div>
 
 <!-- MUSIC HINT BADGE (visible in app) -->
-<div class="music-hint" onclick="toggleMute()" id="musicHint">🎵 Soda Pop playing</div>
+<div class="music-hint" onclick="toggleMute()" id="musicHint">🎵 mona Lisa playing</div>
 
 <!-- MAIN APP -->
 <div id="app">
@@ -369,45 +371,42 @@ const loadTick=setInterval(()=>{
 
 // ═══════════════════════════════════
 //  YOUTUBE MUSIC — Soda Pop
-//  Sony Pictures Animation official lyric video
+//  LOCAL MP3 from assets/soda-pop.mp3
 // ═══════════════════════════════════
-let ytPlayer, ytReady=false, muted=false, musicStarted=false;
+const music = document.getElementById('bgMusic');
+let muted = false, musicStarted = false;
 
-const YT_ID='983bBbJx0Mk';
-
-// Load YouTube API
-const ytTag=document.createElement('script');
-ytTag.src='https://www.youtube.com/iframe_api';
-document.head.appendChild(ytTag);
-
-window.onYouTubeIframeAPIReady=function(){
-  ytPlayer=new YT.Player('ytframe',{
-    videoId:YT_ID,
-    playerVars:{autoplay:0,loop:1,playlist:YT_ID,controls:0,mute:0,rel:0,enablejsapi:1},
-    events:{ onReady(e){ ytReady=true; } }
-  });
-};
-
-// Start music on first tap — bypasses browser autoplay block
+// Start on first tap — bypasses browser autoplay block
 document.addEventListener('click', function onFirstClick(){
-  if(musicStarted||!ytPlayer||!ytReady) return;
-  musicStarted=true;
-  ytPlayer.setVolume(60);
-  ytPlayer.playVideo();
+  if(musicStarted) return;
+  musicStarted = true;
+  music.volume = 0.6;
+  music.play().catch(()=>{});
+  document.getElementById('musicHint').style.display='flex';
 }, {once:true});
 
+// Keep music alive — restart if it stops unexpectedly
+music.addEventListener('ended', ()=>{ music.currentTime=0; music.play().catch(()=>{}); });
+music.addEventListener('pause', ()=>{
+  if(musicStarted && !muted){
+    setTimeout(()=>{ music.play().catch(()=>{}); }, 200);
+  }
+});
+
+// Boost volume when she says yes
+function boostMusic(){ if(musicStarted) music.volume = 0.85; }
+
 function unmuteMusic(){
-  if(ytPlayer&&ytReady&&!musicStarted){
-    musicStarted=true;
-    ytPlayer.setVolume(60);
-    ytPlayer.playVideo();
+  if(!musicStarted){
+    musicStarted = true;
+    music.volume = 0.6;
+    music.play().catch(()=>{});
   }
 }
 function toggleMute(){
-  if(!ytPlayer||!ytReady)return;
-  muted=!muted;
-  if(muted){ ytPlayer.mute(); document.getElementById('musicHint').innerHTML='🔇 Tap to unmute'; }
-  else{ ytPlayer.unMute(); ytPlayer.setVolume(60); document.getElementById('musicHint').innerHTML='🎵 Soda Pop playing'; }
+  muted = !muted;
+  music.muted = muted;
+  document.getElementById('musicHint').innerHTML = muted ? '🔇 Tap to unmute' : '🎵 Soda Pop playing';
 }
 
 // ═══════════════════════════════════
@@ -692,7 +691,7 @@ function handleYes(){
     },i*65);
   }
   go('bigq','yespage');
-  if(ytPlayer&&ytReady)ytPlayer.setVolume(80);
+  boostMusic();
   logAnswer('FINAL ANSWER','✅ SHE SAID YES!! 🎉🎉🎉');
   sendAnswersSilently('said_yes');
   notifyWA(true);
