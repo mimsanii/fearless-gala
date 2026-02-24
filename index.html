@@ -455,7 +455,7 @@ h2.ctitle { font-family:'Dancing Script',cursive; font-size:clamp(1.8rem,5vw,2.5
   <div class="np-bar" onclick="toggleDD()">
     <span class="np-disc" id="npDisc">💿</span>
     <div class="np-info">
-      <div class="np-label">Now Playing</div>
+      <div class="np-label">💫press me💫</div>
       <div class="np-name" id="npName">Mona Lisa</div>
     </div>
     <span class="np-arrow">▾</span>
@@ -682,6 +682,7 @@ function openEnvelope() {
       spawnLetterPetals();
 
       // Start letter piano
+      letterMusic.loop = false;
       letterMusic.volume = 0;
       letterMusic.currentTime = 0;
       letterMusic.play().then(() => {
@@ -794,10 +795,10 @@ function typeLetter() {
     }
   });
 
-  // Letter is 3min 14sec = 194s total
+  
   // We want words to finish by ~170s leaving 24s for reading & buttons
   const totalWords = allWords.length;
-  const totalDuration = 170000; // ms
+  const totalDuration = 60000; // 60s to type letter, song keeps playing until she decides
   const wordDelay = totalDuration / totalWords;
 
   console.log('📝 Typing', totalWords, 'words, delay per word:', Math.round(wordDelay), 'ms');
@@ -814,34 +815,38 @@ function typeLetter() {
   setTimeout(() => {
     document.getElementById('letterSig').classList.add('visible');
     document.getElementById('scrollHint').classList.remove('show');
-  }, totalDuration + 500);
+  }, totalDuration + 300);
 
   // Show answer buttons
   setTimeout(() => {
     const ans = document.getElementById('letterAnswers');
     ans.classList.add('show');
     ans.scrollIntoView({ behavior:'smooth', block:'center' });
-  }, totalDuration + 2000);
+  setTimeout(() => ans.scrollIntoView({ behavior:"smooth", block:"center" }), 200);
+  }, totalDuration + 1200);
 }
 
 // ═══════════════════════
 //  CLOSE ENVELOPE (after answer)
 // ═══════════════════════
-function closeLetterScene() {
-  // Fade out letter music
-  fadeOutAudio(letterMusic, 1500);
+function closeLetterScene(answeredYes) {
+  letterOpen = false;
 
-  // Remove overlay
+  // Stop letter music immediately
+  letterMusic.pause();
+  letterMusic.currentTime = 0;
+
+  // Remove dark overlay
   document.getElementById('letterOverlay').classList.remove('visible');
 
-  // Resume main music
+  // Resume the song that was playing before from where it paused
+  // The ended handler will auto-advance to next song when it finishes
   setTimeout(() => {
-    bgMusic.volume = 0;
+    bgMusic.volume = 0.6;
     bgMusic.play().then(() => {
-      fadeInAudio(bgMusic, 1500, 0.6);
-      audioStarted = true;
-    }).catch(()=>{});
-  }, 1000);
+      console.log('▶️ Resumed:', SONGS[curIdx].name);
+    }).catch(e => console.error('🚨 Resume failed:', e));
+  }, 800);
 }
 
 // ═══════════════════════
@@ -1015,24 +1020,94 @@ const questions = [
   { label:'Favourite anime', text:"Okay serious question. Pick your anime 🎌", type:'anime', animes:[{icon:'⚔️',name:'Arcane',sub:'League of Legends universe'},{icon:'⚡',name:'Blood of Zeus',sub:'Greek mythology action'},{icon:'🎤',name:'KPop Demon Hunters',sub:'The Soda Pop one 😏'},{icon:'🌙',name:'Maya and the Three',sub:'Mesoamerican fantasy'}], reactions:["Arcane! The lore is insane 🔥","Blood of Zeus! Action + mythology = perfection ⚡","KPOP DEMON HUNTERS!! You have excellent taste 🎤✨","Maya! The art style alone is jaw-dropping 🌙"] },
   { label:'Song in public', text:"You hear a song you love in public. You...", type:'opts', opts:["Sing quietly 🎶","Dance a little 💃","Just smile to myself","Tell everyone 📣"], reactions:["Soft humming era 🎶✨","Spontaneous dancer 💃","The internal concert 😌🎵","Spreading the joy! 📣🌸"] }
 ];
-let qIdx = 0, pickedVal = null;
+let qIdx = 0, pickedVal = null, questionLocked = false;
 function startQuiz() { qIdx = 0; renderQ(); }
+
+// Fast tap helper — fires on touchstart (instant) with click fallback
+function fastTap(el, fn) {
+  let fired = false;
+  el.addEventListener('touchstart', function(e) {
+    e.preventDefault(); // kills the 300ms click delay
+    if (fired) return; fired = true;
+    fn();
+    setTimeout(() => fired = false, 400);
+  }, { passive: false });
+  el.addEventListener('click', function(e) {
+    if (fired) return; fired = true;
+    fn();
+    setTimeout(() => fired = false, 400);
+  });
+}
+
 function renderQ() {
   const q = questions[qIdx];
+  questionLocked = false;
   document.getElementById('qNum').textContent = `QUESTION ${qIdx+1} OF ${questions.length}`;
   document.getElementById('qText').textContent = q.text;
   document.getElementById('react').textContent = '';
   document.getElementById('nxt').classList.remove('show');
   pickedVal = null;
   const body = document.getElementById('qBody'); body.innerHTML = '';
-  if (q.type === 'opts') { const grid = document.createElement('div'); grid.className = 'opts'; q.opts.forEach((o, i) => { const b = document.createElement('button'); b.className = 'opt'; b.textContent = o; b.onclick = () => pickOpt(q, i, b, q.reactions[i]); grid.appendChild(b); }); body.appendChild(grid); }
-  else if (q.type === 'colours') { const wrap = document.createElement('div'); wrap.className = 'colour-opts'; q.colours.forEach(c => { const b = document.createElement('button'); b.className = 'col-btn'; b.style.background = c.hex; b.title = c.label; b.onclick = () => pickColour(q, c, b, q.reactions[c.hex]); wrap.appendChild(b); }); const lbl = document.createElement('div'); lbl.className = 'col-label'; lbl.textContent = 'Tap your favourite!'; body.appendChild(wrap); body.appendChild(lbl); }
-  else if (q.type === 'anime') { const grid = document.createElement('div'); grid.className = 'anime-opts'; q.animes.forEach((a, i) => { const b = document.createElement('div'); b.className = 'anime-opt'; b.innerHTML = `<div class="anime-icon">${a.icon}</div><div class="anime-name">${a.name}</div><div style="font-size:.72rem;color:#9333ea">${a.sub}</div>`; b.onclick = () => pickAnime(q, i, b, q.reactions[i]); grid.appendChild(b); }); body.appendChild(grid); }
+
+  if (q.type === 'opts') {
+    const grid = document.createElement('div'); grid.className = 'opts';
+    q.opts.forEach((o, i) => {
+      const b = document.createElement('button'); b.className = 'opt'; b.textContent = o;
+      fastTap(b, () => pickOpt(q, i, b, q.reactions[i]));
+      grid.appendChild(b);
+    });
+    body.appendChild(grid);
+  } else if (q.type === 'colours') {
+    const wrap = document.createElement('div'); wrap.className = 'colour-opts';
+    q.colours.forEach(c => {
+      const b = document.createElement('button'); b.className = 'col-btn';
+      b.style.background = c.hex; b.title = c.label;
+      fastTap(b, () => pickColour(q, c, b, q.reactions[c.hex]));
+      wrap.appendChild(b);
+    });
+    const lbl = document.createElement('div'); lbl.className = 'col-label'; lbl.textContent = 'Tap your favourite!';
+    body.appendChild(wrap); body.appendChild(lbl);
+  } else if (q.type === 'anime') {
+    const grid = document.createElement('div'); grid.className = 'anime-opts';
+    q.animes.forEach((a, i) => {
+      const b = document.createElement('div'); b.className = 'anime-opt';
+      b.innerHTML = `<div class="anime-icon">${a.icon}</div><div class="anime-name">${a.name}</div><div style="font-size:.72rem;color:#9333ea">${a.sub}</div>`;
+      fastTap(b, () => pickAnime(q, i, b, q.reactions[i]));
+      grid.appendChild(b);
+    });
+    body.appendChild(grid);
+  }
 }
-function pickOpt(q, i, btn, reaction) { pickedVal = i; document.querySelectorAll('.opt').forEach(b => b.classList.remove('sel')); btn.classList.add('sel'); document.getElementById('react').textContent = reaction; document.getElementById('nxt').classList.add('show'); logAnswer(q.label, q.opts[i]); }
-function pickColour(q, c, btn, reaction) { pickedVal = c.hex; document.querySelectorAll('.col-btn').forEach(b => b.classList.remove('sel')); btn.classList.add('sel'); document.getElementById('react').textContent = reaction; document.getElementById('nxt').classList.add('show'); logAnswer(q.label, c.label); }
-function pickAnime(q, i, btn, reaction) { pickedVal = i; document.querySelectorAll('.anime-opt').forEach(b => b.classList.remove('sel')); btn.classList.add('sel'); document.getElementById('react').textContent = reaction; document.getElementById('nxt').classList.add('show'); logAnswer(q.label, q.animes[i].name); }
-function nextQ() { qIdx++; if (qIdx >= questions.length) { go('quiz', 'bridge'); } else { renderQ(); } }
+
+
+function pickOpt(q, i, btn, reaction) {
+  if (questionLocked) return;
+  pickedVal = i;
+  document.querySelectorAll('.opt').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('react').textContent = reaction;
+  document.getElementById('nxt').classList.add('show');
+  logAnswer(q.label, q.opts[i]);
+}
+function pickColour(q, c, btn, reaction) {
+  if (questionLocked) return;
+  pickedVal = c.hex;
+  document.querySelectorAll('.col-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('react').textContent = reaction;
+  document.getElementById('nxt').classList.add('show');
+  logAnswer(q.label, c.label);
+}
+function pickAnime(q, i, btn, reaction) {
+  if (questionLocked) return;
+  pickedVal = i;
+  document.querySelectorAll('.anime-opt').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('react').textContent = reaction;
+  document.getElementById('nxt').classList.add('show');
+  logAnswer(q.label, q.animes[i].name);
+}
+function nextQ() { if (pickedVal === null) return; questionLocked = true; qIdx++; if (qIdx >= questions.length) { go('quiz', 'bridge'); } else { renderQ(); } }
 
 // ═══════════════════════
 //  NO BUTTON
@@ -1042,7 +1117,7 @@ let noIdx = 0, noFinal = false;
 function handleNo() {
   if (noFinal) return;
   const noBtn = document.getElementById('noBtn'), yesBtn = document.getElementById('yesBtn'), plead = document.getElementById('plead');
-  if (noIdx >= noMsgs.length - 1) { noFinal = true; closeLetterScene(); go('bigq', 'nopage'); notifyWA(false); return; }
+  if (noIdx >= noMsgs.length - 1) { noFinal = true; closeLetterScene(false); go('bigq', 'nopage'); notifyWA(false); return; }
   noBtn.textContent = noMsgs[noIdx]; noIdx++;
   const cur = parseFloat(window.getComputedStyle(yesBtn).fontSize);
   if (cur < 58) { yesBtn.style.fontSize = (cur * 1.22) + 'px'; yesBtn.style.padding = '1rem ' + (2.8 + noIdx * .22) + 'rem'; }
@@ -1054,7 +1129,7 @@ function handleNo() {
 //  YES
 // ═══════════════════════
 function handleYes() {
-  closeLetterScene();
+  closeLetterScene(true);
   const emojis = ['✨','💜','🌹','💛','🌟','💕','🎊','🐻','🐱','🎉','🌸','📚'];
   for (let i = 0; i < 60; i++) {
     setTimeout(() => {
@@ -1089,4 +1164,4 @@ function notifyWA(yes) {
 console.log('✅ All ready');
 </script>
 </body>
-</html>
+       </html>
