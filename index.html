@@ -376,39 +376,59 @@ const loadTick=setInterval(()=>{
 const music = document.getElementById('bgMusic');
 let muted = false, musicStarted = false;
 
-// Start on first tap — bypasses browser autoplay block
-document.addEventListener('click', function onFirstClick(){
+// Start on ANY interaction
+function tryPlay(){
   if(musicStarted) return;
-  musicStarted = true;
+
   music.volume = 0.6;
-  music.play().catch(()=>{});
-  document.getElementById('musicHint').style.display='flex';
-}, {once:true});
+  const p = music.play();
+
+  if(p !== undefined){
+    p.then(()=>{
+      musicStarted = true;
+      document.getElementById('musicHint').style.display='flex';
+    }).catch(e=>{
+      console.log('blocked:', e);
+    });
+  }
+}
+
+document.addEventListener('click', tryPlay);
+document.addEventListener('touchstart', tryPlay);
+document.addEventListener('touchend', tryPlay);
 
 // Keep music alive — restart if it stops unexpectedly
-music.addEventListener('ended', ()=>{ music.currentTime=0; music.play().catch(()=>{}); });
+music.addEventListener('ended', ()=>{
+  music.currentTime = 0;
+  music.play().catch(()=>{});
+});
+
 music.addEventListener('pause', ()=>{
   if(musicStarted && !muted){
-    setTimeout(()=>{ music.play().catch(()=>{}); }, 200);
+    setTimeout(()=>{
+      music.play().catch(()=>{});
+    }, 200);
   }
 });
 
 // Boost volume when she says yes
-function boostMusic(){ if(musicStarted) music.volume = 0.85; }
+function boostMusic(){
+  if(musicStarted) music.volume = 0.85;
+}
 
 function unmuteMusic(){
   if(!musicStarted){
-    musicStarted = true;
     music.volume = 0.6;
     music.play().catch(()=>{});
   }
 }
+
 function toggleMute(){
   muted = !muted;
   music.muted = muted;
-  document.getElementById('musicHint').innerHTML = muted ? '🔇 Tap to unmute' : '🎵 Soda Pop playing';
+  document.getElementById('musicHint').innerHTML =
+    muted ? '🔇 Tap to unmute' : '🎵 Soda Pop playing';
 }
-
 // ═══════════════════════════════════
 //  LAUNCH APP
 // ═══════════════════════════════════
