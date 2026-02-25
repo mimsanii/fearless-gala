@@ -6,6 +6,25 @@
 <title>✨ Something for 🎀Ciiru🎀</title>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@400;500;600;700&family=Raleway:wght@300;600;800&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet"/>
 <style>
+
+/* ══ GLOBAL TAP FIX ══ */
+html { touch-action: manipulation; }
+button, .opt, .col-btn, .anime-opt, .song-row, .np-bar, .yes-btn, .no-btn, .btn-p, .nxt {
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+  cursor: pointer !important;
+  position: relative;
+  z-index: 9000 !important;
+  pointer-events: all !important;
+}
+/* Widget container never blocks taps */
+#nowPlaying { pointer-events: none !important; }
+#nowPlaying .np-bar, #nowPlaying #songDropdown { pointer-events: all !important; }
+/* Floaties and flowers NEVER block anything */
+.floaties, .flower, .floatie, #beatBar, #themeFlash, #letterOverlay {
+  pointer-events: none !important;
+}
+
 * { margin:0; padding:0; box-sizing:border-box; }
 html, body { width:100%; min-height:100vh; touch-action:manipulation; } * { -webkit-tap-highlight-color:transparent; }
 
@@ -27,15 +46,15 @@ canvas#particles { position:fixed; inset:0; z-index:0; pointer-events:none; }
 #app.visible { display:block; }
 
 /* ══ NOW PLAYING WIDGET ══ */
-#nowPlaying { position:fixed; top:10px; right:10px; z-index:99999; display:none; flex-direction:column; align-items:flex-end; gap:4px; }
+#nowPlaying { position:fixed; top:8px; right:8px; z-index:1; display:none; flex-direction:column; align-items:flex-end; gap:4px; pointer-events:none; }
 #nowPlaying.show { display:flex; }
-.np-bar { display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.95); backdrop-filter:blur(20px); border:1.5px solid rgba(244,114,182,.35); border-radius:40px; padding:6px 14px 6px 10px; box-shadow:0 4px 20px rgba(244,114,182,.25); cursor:pointer; user-select:none; transition:box-shadow .3s,transform .2s; max-width:220px; }
+.np-bar { display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.96); backdrop-filter:blur(20px); border:1.5px solid rgba(244,114,182,.35); border-radius:40px; padding:6px 12px 6px 10px; box-shadow:0 4px 24px rgba(244,114,182,.3); cursor:pointer; user-select:none; transition:box-shadow .3s,transform .2s; pointer-events:all; }
 .np-bar:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(244,114,182,.4); }
 .np-disc { font-size:1.1rem; animation:spinDisc 3s linear infinite; flex-shrink:0; }
 @keyframes spinDisc { from{transform:rotate(0)} to{transform:rotate(360deg)} }
 .np-info { flex:1; min-width:0; }
-.np-label { font-size:.58rem; letter-spacing:2px; text-transform:uppercase; color:rgba(190,24,93,.5); font-family:'Quicksand',sans-serif; font-weight:700; }
-.np-name { font-size:.78rem; font-weight:700; color:#be185d; font-family:'Quicksand',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.np-label { font-size:.55rem; letter-spacing:1px; text-transform:uppercase; color:rgba(190,24,93,.5); font-family:'Quicksand',sans-serif; font-weight:700; }
+.np-name { font-size:.78rem; font-weight:700; color:#be185d; font-family:'Quicksand',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px; }
 .np-arrow { font-size:.6rem; color:rgba(190,24,93,.5); flex-shrink:0; transition:transform .3s; }
 #nowPlaying.open .np-arrow { transform:rotate(180deg); }
 
@@ -134,8 +153,8 @@ h2.ctitle { font-family:'Dancing Script',cursive; font-size:clamp(1.8rem,5vw,2.5
 .btn-p:active { transform:scale(.96); transition:transform .05s; }
 .q-num { font-size:.72rem; letter-spacing:3px; text-transform:uppercase; color:rgba(192,132,252,.7); margin-bottom:.6rem; }
 .q-text { font-family:'Dancing Script',cursive; font-size:clamp(1.2rem,4vw,1.65rem); color:#6b21a8; line-height:1.5; margin-bottom:1.5rem; }
-.opts { display:grid; grid-template-columns:1fr 1fr; gap:.7rem; margin-bottom:.5rem; }
-.opt { background:linear-gradient(135deg,rgba(253,232,255,.7),rgba(219,234,254,.7)); border:1.5px solid rgba(192,132,252,.3); color:#7c3aed; font-family:'Quicksand',sans-serif; font-size:.87rem; font-weight:600; border-radius:14px; padding:.85rem .6rem; cursor:pointer; transition:background .08s, border-color .08s, color .08s, transform .08s; line-height:1.35; -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none; }
+.opts { display:grid; grid-template-columns:1fr 1fr; gap:.7rem; margin-bottom:.5rem; width:100%; }
+.opt { background:linear-gradient(135deg,rgba(253,232,255,.7),rgba(219,234,254,.7)); border:1.5px solid rgba(192,132,252,.3); color:#7c3aed; font-family:'Quicksand',sans-serif; font-size:.87rem; font-weight:600; border-radius:14px; padding:.85rem .6rem; cursor:pointer; transition:background .08s, border-color .08s, color .08s, transform .08s; line-height:1.35; -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none; position:relative; z-index:200; }
 .opt:active { transform:scale(.95); }
 .opt.sel { background:linear-gradient(135deg,rgba(244,114,182,.35),rgba(192,132,252,.3)); border-color:#f472b6; color:#be185d; transform:scale(1); }
 .react { margin-top:.9rem; font-size:1.15rem; min-height:1.7rem; color:#be185d; }
@@ -144,14 +163,14 @@ h2.ctitle { font-family:'Dancing Script',cursive; font-size:clamp(1.8rem,5vw,2.5
 .nxt:active { transform:scale(.95); }
 .nxt.show { display:inline-block; }
 .colour-opts { display:flex; flex-wrap:wrap; justify-content:center; gap:.8rem; margin-bottom:.5rem; }
-.col-btn { width:56px; height:56px; border-radius:50%; border:3px solid rgba(255,255,255,.6); cursor:pointer; transition:transform .08s, border-color .08s, box-shadow .08s; box-shadow:0 4px 12px rgba(0,0,0,.15); position:relative; overflow:hidden; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+.col-btn { width:56px; height:56px; border-radius:50%; border:3px solid rgba(255,255,255,.6); cursor:pointer; transition:transform .08s, border-color .08s, box-shadow .08s; box-shadow:0 4px 12px rgba(0,0,0,.15); position:relative; overflow:hidden; -webkit-tap-highlight-color:transparent; touch-action:manipulation; z-index:200; }
 .col-btn:active { transform:scale(.88); }
 .col-btn.sel { border-color:#fbbf24; border-width:4px; transform:scale(1.2); box-shadow:0 0 0 3px #fbbf24; }
 .col-btn::after { content:'✓'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.4rem; color:rgba(255,255,255,.9); opacity:0; transition:opacity .08s; }
 .col-btn.sel::after { opacity:1; }
 .col-label { font-size:.78rem; color:#6b21a8; margin-top:.5rem; }
 .anime-opts { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
-.anime-opt { background:rgba(255,255,255,.6); border:2px solid rgba(192,132,252,.25); border-radius:16px; padding:.8rem .5rem; cursor:pointer; transition:background .08s, border-color .08s, transform .08s; display:flex; flex-direction:column; align-items:center; gap:.3rem; -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none; }
+.anime-opt { background:rgba(255,255,255,.6); border:2px solid rgba(192,132,252,.25); border-radius:16px; padding:.8rem .5rem; cursor:pointer; transition:background .08s, border-color .08s, transform .08s; display:flex; flex-direction:column; align-items:center; gap:.3rem; -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none; position:relative; z-index:200; }
 .anime-opt:active { transform:scale(.94); }
 .anime-opt .anime-icon { font-size:2rem; }
 .anime-opt .anime-name { font-size:.8rem; font-weight:700; color:#7c3aed; line-height:1.2; }
@@ -452,10 +471,10 @@ h2.ctitle { font-family:'Dancing Script',cursive; font-size:clamp(1.8rem,5vw,2.5
 
 <!-- NOW PLAYING WIDGET -->
 <div id="nowPlaying">
-  <div class="np-bar" onclick="toggleDD()">
+  <div class="np-bar" id="npBarBtn">
     <span class="np-disc" id="npDisc">💿</span>
     <div class="np-info">
-      <div class="np-label">💫press me💫</div>
+      <div class="np-label">😏press me😏</div>
       <div class="np-name" id="npName">Mona Lisa</div>
     </div>
     <span class="np-arrow">▾</span>
@@ -487,7 +506,7 @@ h2.ctitle { font-family:'Dancing Script',cursive; font-size:clamp(1.8rem,5vw,2.5
       <div class="doll-row"><span>🐻</span><span>🐱</span></div>
       <h2 class="ctitle">Psssst. 🎀Ciiru🎀 👀</h2>
       <p class="csub">So... someone asked me to pass something along.<br/>It's not a big deal at all.<br/><em style="color:#be185d">...or maybe it is. 🙈</em></p>
-      <button class="btn-p" onclick="go('intro','quiz');startQuiz()">Okay, I'm curious →</button>
+      <button class="btn-p" id="btnIntro">Okay, I'm curious →</button>
     </div>
   </div>
 
@@ -498,7 +517,7 @@ h2.ctitle { font-family:'Dancing Script',cursive; font-size:clamp(1.8rem,5vw,2.5
       <div class="q-text" id="qText"></div>
       <div id="qBody"></div>
       <div class="react" id="react"></div>
-      <button class="nxt" id="nxt" onclick="nextQ()">Continue →</button>
+      <button class="nxt" id="nxt">Continue →</button>
     </div>
   </div>
 
@@ -508,7 +527,7 @@ h2.ctitle { font-family:'Dancing Script',cursive; font-size:clamp(1.8rem,5vw,2.5
       <div class="doll-row"><span>🐻</span><span>🐱</span></div>
       <h2 class="ctitle">Okay real quick...</h2>
       <p class="csub">Those were fun. But there's actually a reason<br/>you're here today, 🎀Ciiru🎀. 👀<br/><br/><em style="color:#be185d">Micky has something to ask you.</em></p>
-      <button class="btn-p" onclick="go('bridge','bigq')">Fine... what is it? →</button>
+      <button class="btn-p" id="btnBridge">Fine... what is it? →</button>
     </div>
   </div>
 
@@ -527,7 +546,7 @@ h2.ctitle { font-family:'Dancing Script',cursive; font-size:clamp(1.8rem,5vw,2.5
         <span class="env-sparkle" style="bottom:20px;right:-15px;--sd:3.8s">🌹</span>
         <span class="env-sparkle" style="top:50%;left:-25px;--sd:4.1s">⭐</span>
 
-        <div class="envelope-wrap" id="envelopeWrap" onclick="openEnvelope()">
+        <div class="envelope-wrap" id="envelopeWrap">
           <!-- flap back -->
           <div class="env-flap" id="envFlap"></div>
           <!-- flap front face (shown under flap) -->
@@ -553,8 +572,8 @@ h2.ctitle { font-family:'Dancing Script',cursive; font-size:clamp(1.8rem,5vw,2.5
         <div class="letter-answers" id="letterAnswers">
           <div class="letter-question">So... what do you say? 🌸</div>
           <div class="letter-btns">
-            <button class="yes-btn" id="yesBtn" onclick="handleYes()">Yes, I will! 💚</button>
-            <button class="no-btn" id="noBtn" onclick="handleNo()">No... 😬</button>
+            <button class="yes-btn" id="yesBtn">Yes, I will! 💚</button>
+            <button class="no-btn" id="noBtn">No... 😬</button>
           </div>
           <div class="plead" id="plead"></div>
         </div>
@@ -981,6 +1000,7 @@ function launchApp() {
   setTimeout(() => document.getElementById('loading').style.display = 'none', 800);
   document.getElementById('app').classList.add('visible');
   document.getElementById('nowPlaying').classList.add('show');
+  bindNavButtons();
   buildFloaties(SONGS[0].floaties);
   buildFlowers(SONGS[0].flowers);
   buildSongList();
@@ -1037,6 +1057,25 @@ function fastTap(el, fn) {
     fn();
     setTimeout(() => fired = false, 400);
   });
+}
+
+// Bind all nav buttons with fastTap
+function bindNavButtons() {
+  const btnIntro   = document.getElementById('btnIntro');
+  const btnBridge  = document.getElementById('btnBridge');
+  const nxt        = document.getElementById('nxt');
+  const npBarBtn   = document.getElementById('npBarBtn');
+  const envWrap    = document.getElementById('envelopeWrap');
+  const yesBtn     = document.getElementById('yesBtn');
+  const noBtn      = document.getElementById('noBtn');
+
+  if (btnIntro)  fastTap(btnIntro,  () => { go('intro','quiz'); startQuiz(); });
+  if (btnBridge) fastTap(btnBridge, () => go('bridge','bigq'));
+  if (nxt)       fastTap(nxt,       () => nextQ());
+  if (npBarBtn)  fastTap(npBarBtn,  () => toggleDD());
+  if (envWrap)   fastTap(envWrap,   () => openEnvelope());
+  if (yesBtn)    fastTap(yesBtn,    () => handleYes());
+  if (noBtn)     fastTap(noBtn,     () => handleNo());
 }
 
 function renderQ() {
@@ -1163,5 +1202,16 @@ function notifyWA(yes) {
 
 console.log('✅ All ready');
 </script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+#credit { position:fixed; bottom:8px; left:50%; transform:translateX(-50%); z-index:99998; font-family:'Quicksand',sans-serif; font-size:.68rem; color:rgba(255,255,255,.45); letter-spacing:1.5px; pointer-events:none; white-space:nowrap; }
+#credit i { color:#f472b6; animation:heartbeat 1.4s ease-in-out infinite; }
+#credit span { color:#c084fc; font-weight:700; }
+@keyframes heartbeat { 0%,100%{transform:scale(1)} 50%{transform:scale(1.35)} }
+</style>
+<div id="credit">
+  <p>Crafted with 💞 and passion by <span>#MIMSANII</span>.</p>
+</div>
 </body>
-       </html>
+</html>
