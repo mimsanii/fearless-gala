@@ -9,7 +9,7 @@
 
 /* ══ GLOBAL TAP FIX ══ */
 html { touch-action: manipulation; }
-button, .opt, .col-btn, .anime-opt, .song-row, .np-bar, .yes-btn, .no-btn, .btn-p, .nxt {
+button, .opt, .col-btn, .anime-opt, .yes-btn, .no-btn, .btn-p, .nxt {
   touch-action: manipulation !important;
   -webkit-tap-highlight-color: transparent !important;
   cursor: pointer !important;
@@ -17,9 +17,7 @@ button, .opt, .col-btn, .anime-opt, .song-row, .np-bar, .yes-btn, .no-btn, .btn-
   z-index: 9000 !important;
   pointer-events: all !important;
 }
-/* Widget container never blocks taps */
-#nowPlaying { pointer-events: none !important; }
-#nowPlaying .np-bar, #nowPlaying #songDropdown { pointer-events: all !important; }
+/* Widget sits above page */
 /* Floaties and flowers NEVER block anything */
 .floaties, .flower, .floatie, #beatBar, #themeFlash, #letterOverlay {
   pointer-events: none !important;
@@ -46,7 +44,7 @@ canvas#particles { position:fixed; inset:0; z-index:0; pointer-events:none; }
 #app.visible { display:block; }
 
 /* ══ NOW PLAYING WIDGET ══ */
-#nowPlaying { position:fixed; top:8px; right:8px; z-index:1; display:none; flex-direction:column; align-items:flex-end; gap:4px; pointer-events:none; }
+#nowPlaying { position:fixed; top:8px; right:8px; z-index:9999; display:none; flex-direction:column; align-items:flex-end; gap:4px; }
 #nowPlaying.show { display:flex; }
 .np-bar { display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.96); backdrop-filter:blur(20px); border:1.5px solid rgba(244,114,182,.35); border-radius:40px; padding:6px 12px 6px 10px; box-shadow:0 4px 24px rgba(244,114,182,.3); cursor:pointer; user-select:none; transition:box-shadow .3s,transform .2s; pointer-events:all; }
 .np-bar:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(244,114,182,.4); }
@@ -471,10 +469,10 @@ h2.ctitle { font-family:'Dancing Script',cursive; font-size:clamp(1.8rem,5vw,2.5
 
 <!-- NOW PLAYING WIDGET -->
 <div id="nowPlaying">
-  <div class="np-bar" id="npBarBtn">
+  <div class="np-bar" id="npBarBtn" onclick="toggleDD()">
     <span class="np-disc" id="npDisc">💿</span>
     <div class="np-info">
-      <div class="np-label">😏press me😏</div>
+      <div class="np-label">Now Playing</div>
       <div class="np-name" id="npName">Mona Lisa</div>
     </div>
     <span class="np-arrow">▾</span>
@@ -880,7 +878,7 @@ function buildSongList() {
     row.className = 'song-row' + (i === curIdx ? ' active' : '');
     row.id = 'sr-' + i;
     row.innerHTML = `<span class="s-icon">${s.icon}</span><div class="s-text"><div class="s-name">${s.name}</div><div class="s-from">${s.movie}</div></div><div class="s-dot" style="background:${s.dot};box-shadow:0 0 5px ${s.dot}"></div>`;
-    row.addEventListener('click', () => { switchSong(i); closeDD(); });
+    row.onclick = () => { switchSong(i); closeDD(); };
     list.appendChild(row);
   });
   console.log('✅ Song list built');
@@ -925,9 +923,10 @@ function switchSong(idx) {
 // ═══════════════════════
 //  DROPDOWN
 // ═══════════════════════
-function toggleDD() { ddOpen = !ddOpen; document.getElementById('nowPlaying').classList.toggle('open', ddOpen); document.getElementById('songDropdown').classList.toggle('open', ddOpen); }
+function toggleDD() { ddOpen = !ddOpen; document.getElementById('songDropdown').classList.toggle('open', ddOpen); document.getElementById('nowPlaying').classList.toggle('open', ddOpen); }
 function closeDD() { ddOpen = false; document.getElementById('nowPlaying').classList.remove('open'); document.getElementById('songDropdown').classList.remove('open'); }
 document.addEventListener('click', e => { if (!document.getElementById('nowPlaying').contains(e.target)) closeDD(); });
+document.addEventListener('touchstart', e => { if (!document.getElementById('nowPlaying').contains(e.target)) closeDD(); }, { passive: true });
 
 // ═══════════════════════
 //  AUDIO START
@@ -1072,7 +1071,7 @@ function bindNavButtons() {
   if (btnIntro)  fastTap(btnIntro,  () => { go('intro','quiz'); startQuiz(); });
   if (btnBridge) fastTap(btnBridge, () => go('bridge','bigq'));
   if (nxt)       fastTap(nxt,       () => nextQ());
-  if (npBarBtn)  fastTap(npBarBtn,  () => toggleDD());
+  // npBarBtn uses onclick directly - no fastTap needed
   if (envWrap)   fastTap(envWrap,   () => openEnvelope());
   if (yesBtn)    fastTap(yesBtn,    () => handleYes());
   if (noBtn)     fastTap(noBtn,     () => handleNo());
@@ -1211,7 +1210,7 @@ console.log('✅ All ready');
 @keyframes heartbeat { 0%,100%{transform:scale(1)} 50%{transform:scale(1.35)} }
 </style>
 <div id="credit">
-  <p>Crafted with 💞 and passion by <span>#MIMSANII</span>.</p>
+  <p>Crafted with <i class="fas fa-heart"></i> and passion by <span>#MIMSANII</span>.</p>
 </div>
 </body>
 </html>
